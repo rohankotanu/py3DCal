@@ -1,0 +1,11 @@
+# All pycache files
+__pycache__/
+*.pyc
+
+# Distribution / packaging
+build/
+dist/
+py3DCal.egg-info/
+
+test.py
+
