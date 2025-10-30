@@ -9,7 +9,12 @@ from .Printers.Printer import Printer
 from .Sensors.Sensor import Sensor
 
 class Calibrator:
-    def __init__(self, printer:Printer, sensor:Sensor):
+    """ Calibrator class to automatically probe a tactile sensor.
+    Args:
+        printer (Printer): An instance of a Printer class.
+        sensor (Sensor): An instance of a Sensor class.
+    """
+    def __init__(self, printer: Printer, sensor: Sensor):
         self.printer = printer
         self.sensor = sensor
 
@@ -65,11 +70,11 @@ class Calibrator:
             print("")
             return False
 
-    def initialize_printer(self, absolute=True):
+    def initialize_printer(self, absolute: bool = True):
         """ Sends gcode to configure and home 3D Printer
 
         Args:
-            absolute (bool): Determines whether to set 3D printer to absolute mode.
+            absolute (bool, optional): Determines whether to set 3D printer to absolute mode. Defaults to True.
 
         Returns:
             bool: Returns True if initialization was successful.
@@ -131,18 +136,18 @@ class Calibrator:
             print("Error disconnecting from sensor.")
             print("")
             return False
-    
-    def probe(self, home_printer=True, save_images=True, calibration_file_path=None, data_save_path=None):
+
+    def probe(self, home_printer: bool = True, save_images: bool = True, calibration_file_path: str = None, data_save_path: str = None):
         """ Executes the probing procedure on 3D printer
 
         Args:
-            home_printer (bool): Determines whether to home the printer prior to probing.
-            save_images (bool): Determines whether sensor images are saved.
-            calibration_file_path (str): The path of the calibration file. If no file is specified,
-                a default calibration file will be used.
-            data_save_path (str): The folder in which the data should be saved. If no folder is specified,
-                data will be stored in a folder names "sensor_calibration_data" in the user's Downloads folder.
-            
+            home_printer (bool, optional): Determines whether to home the printer prior to probing. Defaults to True.
+            save_images (bool, optional): Determines whether sensor images are saved. Defaults to True.
+            calibration_file_path (str, optional): The path of the calibration file. For the DIGIT and Gelsight Mini,
+                if no file is specified, a default calibration file will be used.
+            data_save_path (str, optional): The folder in which the data should be saved. If no folder is specified,
+                data will be stored in a directory named "sensor_calibration_data" within the current working directory.
+
         Returns:
             bool: Returns True when the probing procedure is complete.
         """
@@ -162,9 +167,7 @@ class Calibrator:
             self.initialize_printer()
 
         # If no data path was provided, set default path to a folder called "sensor_calibration_data" in the Downloads folder
-        if data_save_path == None:
-            data_save_path = str(Path.home() / "Downloads/sensor_calibration_data")
-        else:
+        if data_save_path is not None:
             data_save_path = os.path.join(data_save_path, "sensor_calibration_data")
         
         # Create folder to save sensor data if it doesn't already exist

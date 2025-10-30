@@ -2,29 +2,53 @@ from ..Printer import Printer
 import serial
 
 class Ender3(Printer):
-    def __init__(self, port):
+    """
+    Ender3: A Printer Class for the Ender 3
+    Args:
+        port (str): The COM port the printer is connected to.
+    """
+    def __init__(self, port: str):
         self.port = port
         self.name = "Ender 3"
 
     def connect(self):
+        """
+        Connects to the Ender 3 printer.
+        """
         # Code to connect to the printer
         self.ser = serial.Serial(self.port, 115200)
 
     def disconnect(self):
+        """
+        Disconnects from the Ender 3 printer.
+        """
         # Code to disconnect from the printer
         self.ser.close()
 
-    def send_gcode(self, command):
+    def send_gcode(self, command: str):
+        """
+        Sends a G-code command to the Ender 3 printer.
+        Args:
+            command (str): The G-code command to be sent to the 3D printer.
+        """
         # Code to execute gcode command on the printer
         self.ser.write(str.encode(command + "\r\n"))
 
     def get_response(self):
+        """
+        Gets messages sent by the Ender 3 printer.
+        """
         # Code to return message from the printer
         reading = self.ser.readline().decode('utf-8')
 
         return reading
 
-    def initialize(self, xy_only=False):
+    def initialize(self, xy_only: bool = False):
+        """
+        Initializes the Ender 3 printer (homes the printer, sets units, adjusts fans, etc).
+        Args:
+            xy_only (bool): If True, only homes the X and Y axes.
+        """
         # Code to initialize printer (home, set units, set absolute/relative movements, adjust fan speeds, etc.)
 
         # Use Metric Values

@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 
 class Sensor(ABC):
+    """
+    Sensor: An abstract base class for tactile sensors.
+    """
     def __init__(self):
         self.name = ""
         self.x_offset = 5

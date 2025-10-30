@@ -1,10 +1,23 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r") as f:
+    long_description = f.read()
+
 setup(
     name='py3DCal',
     version='1.0.0',
+    url="https://github.com/rohankotanu/py3DCal",
+    author="Rohan Kota",
+    author_email="rohankota2026@u.northwestern.edu",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=find_packages(),
     include_package_data=True,
+    license='MIT',
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: MIT License',
+    ],
     install_requires=[
         'numpy>=1.0.0',
         'matplotlib>=3.0.0',
@@ -15,6 +28,7 @@ setup(
         'opencv-python>=4.0.0',
         'pillow>=11.0.0',
         'tqdm>=4.0.0',
+        'requests>=2.0.0'
     ],
     entry_points={
         'console_scripts': [
