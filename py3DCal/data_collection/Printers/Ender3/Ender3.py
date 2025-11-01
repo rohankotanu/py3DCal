@@ -1,13 +1,15 @@
 from ..Printer import Printer
 import serial
+from typing import Union
+from pathlib import Path
 
 class Ender3(Printer):
     """
     Ender3: A Printer Class for the Ender 3
     Args:
-        port (str): The COM port the printer is connected to.
+        port (str or pathlib.Path): The COM port the printer is connected to.
     """
-    def __init__(self, port: str):
+    def __init__(self, port: Union[str, Path]):
         self.port = port
         self.name = "Ender 3"
 
@@ -37,11 +39,14 @@ class Ender3(Printer):
     def get_response(self):
         """
         Gets messages sent by the Ender 3 printer.
+
+        Returns:
+            response (str): The message sent by the printer.
         """
         # Code to return message from the printer
-        reading = self.ser.readline().decode('utf-8')
+        response = self.ser.readline().decode('utf-8')
 
-        return reading
+        return response
 
     def initialize(self, xy_only: bool = False):
         """

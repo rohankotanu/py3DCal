@@ -52,9 +52,14 @@ class TouchNet:
         self.download_dataset = download_dataset
         self.transform = transforms.Compose([transforms.ToTensor()])
         self.root = root
-        self.dataset_path = None
-        self.blank_image_path = None
-        self.annotation_path = None
+        if sensor_type == SensorType.DIGIT:
+            self.dataset_path = os.path.join(root, "digit_calibration_data")
+        elif sensor_type == SensorType.GELSIGHTMINI:
+            self.dataset_path = os.path.join(root, "gsmini_calibration_data")
+        else:
+            self.dataset_path = "."
+        self.blank_image_path = os.path.join(self.dataset_path, "blank_images", "blank.png")
+        self.annotation_path = os.path.join(self.dataset_path, "annotations", "annotations.csv")
         self.device = device
 
         if self.load_pretrained_model:
@@ -77,8 +82,8 @@ class TouchNet:
         Returns:
             None.
         """
-        self._validate_device(device)
         self._validate_sensor_type(sensor_type)
+        self._validate_device(device)
         self._validate_load_pretrained_download_dataset(sensor_type, load_pretrained_model, download_dataset)
 
 
@@ -92,21 +97,15 @@ class TouchNet:
         Raises:
             ValueError: If the device is not specified or invalid.
         """
-        if device is None:
-            raise ValueError(
-                "Device must be specified. Valid options include:\n"
-                "  - 'cpu': CPU processing\n"
-                "  - 'cuda' or 'cuda:0': NVIDIA GPU\n"
-                "  - 'mps': Apple Silicon GPU\n"
-                "See: https://pytorch.org/docs/stable/tensor_attributes.html#torch.device"
-            )
-
         try:
             device = torch.device(device)
         except Exception as e:
             raise ValueError(
-                f"Invalid device '{device}'. "
-                f"See https://pytorch.org/docs/stable/tensor_attributes.html#torch.device"
+                f"Invalid device '{device}'. Valid options include:\n"
+                "  - 'cpu': CPU processing\n"
+                "  - 'cuda' or 'cuda:0': NVIDIA GPU\n"
+                "  - 'mps': Apple Silicon GPU\n"
+                "See: https://pytorch.org/docs/stable/tensor_attributes.html#torch.device"
             ) from e
 
     def _validate_sensor_type(self, sensor_type):
@@ -192,7 +191,7 @@ class TouchNet:
             elif coord in test_coords_set:
                 test_idx.append(i)
         transform = transforms.Compose([transforms.ToTensor()])
-        dataset = TactileSensorDataset(dataset_path=self.dataset_path, annotation_path=self.annotation_path, blank_image_path=self.blank_image_path, transform=transform)
+        dataset = TactileSensorDataset(dataset_path=os.path.join(self.dataset_path, "probe_images"), annotation_path=self.annotation_path, blank_image_path=self.blank_image_path, transform=transform)
         train_dataset = Subset(dataset, train_idx)
         test_dataset = Subset(dataset, test_idx)
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=16, pin_memory=True, persistent_workers=True)
@@ -293,7 +292,22 @@ class TouchNet:
         
         depthmap = fast_poisson(output[:,:,0], output[:,:,1])
 
+        depthmap = np.clip(-depthmap, a_min=0, a_max=None)
+
         return depthmap
+
+    def save_depthmap_image(self, image_path: str, save_path: Union[str, Path] = Path("depthmap.png")):
+        """
+        Save an image of the depthmap for a given input image.
+        Args:
+            image_path (str): Path to the input image.
+            save_path (str or pathlib.Path): Path to save the depthmap image.
+        Returns:
+            None.
+        """
+        depthmap = self.get_depthmap(image_path)
+
+        plt.imsave(save_path, depthmap, cmap='viridis')
 
     def show_depthmap(self, image_path: str):
         """
@@ -317,24 +331,67 @@ class TouchNet:
             None.
         """
         if self.sensor_type == SensorType.DIGIT:
-            # Load the DIGIT weights from a url
-            state_dict = load_state_dict_from_url(
-                url="https://digit/model_weights.pth",
-                map_location="cpu",
-                progress=True,
-            )
-            self.model.load_state_dict(state_dict)
+            file_path = os.path.join(self.root, "digit_pretrained_weights.pth")
+            
+            # Check if DIGIT pretrained weights exist locally, if not download them
+            if not os.path.exists(file_path):
+
+                print(f"Downloading DIGIT pretrained weights ...")
+                response = requests.get('https://zenodo.org/records/17487330/files/digit_pretrained_weights.pth?download=1', stream=True)
+                response.raise_for_status()
+
+                total_size = int(response.headers.get('content-length', 0))
+                block_size = 1024
+
+                # Save file in chunks to handle large datasets
+                with open(file_path, 'wb') as f, tqdm(
+                    total=total_size,
+                    unit='B',
+                    unit_scale=True,
+                    desc="Downloading",
+                    ncols=80
+                ) as progress_bar:
+                    for chunk in response.iter_content(chunk_size=block_size):
+                        if chunk:
+                            f.write(chunk)
+                            progress_bar.update(len(chunk))
+
+                print(f"Download complete!")
+            else:
+                print(f"DIGIT pretrained weights already exists at: {file_path}/")
+
         elif self.sensor_type == SensorType.GELSIGHTMINI:
-            # Load the GelSight Mini weights from a url
-            state_dict = load_state_dict_from_url(
-                url="https://gelsightmini/model_weights.pth",
-                map_location="cpu",
-                progress=True,
-            )
-            self.model.load_state_dict(state_dict)
-        else:
-            # Raise an error - sensor not found
-            raise ValueError(f"Invalid sensor type: {self.sensor_type}. Sensor type must be either {SensorType.DIGIT} or {SensorType.GELSIGHTMINI}.")
+            file_path = os.path.join(self.root, "gsmini_pretrained_weights.pth")
+
+            # Check if GelSight Mini pretrained weights exist locally, if not download them
+            if not os.path.exists(file_path):
+
+                print(f"Downloading GelSight Mini pretrained weights ...")
+                response = requests.get('https://zenodo.org/records/17487330/files/gsmini_pretrained_weights.pth?download=1', stream=True)
+                response.raise_for_status()
+
+                total_size = int(response.headers.get('content-length', 0))
+                block_size = 1024
+
+                # Save file in chunks to handle large datasets
+                with open(file_path, 'wb') as f, tqdm(
+                    total=total_size,
+                    unit='B',
+                    unit_scale=True,
+                    desc="Downloading",
+                    ncols=80
+                ) as progress_bar:
+                    for chunk in response.iter_content(chunk_size=block_size):
+                        if chunk:
+                            f.write(chunk)
+                            progress_bar.update(len(chunk))
+
+                print(f"Download complete!")
+            else:
+                print(f"GelSight Mini pretrained weights already exists at: {file_path}/")
+
+        state_dict = torch.load(file_path, map_location="cpu")
+        self.model.load_state_dict(state_dict)
     
     def load_model_weights(self, model_path: Union[str, Path]):
         """
@@ -364,7 +421,7 @@ class TouchNet:
                 tar_path = os.path.join(self.root, "digit_calibration_data.tar.gz")
 
                 print(f"Downloading DIGIT dataset ...")
-                response = requests.get('https://zenodo.org/record/1249354/files/zenodo_open_metadata_17_05_2018.tar.gz', stream=True)
+                response = requests.get('https://zenodo.org/records/17487330/files/digit_calibration_data.tar.gz?download=1', stream=True)
                 response.raise_for_status()
 
                 total_size = int(response.headers.get('content-length', 0))
@@ -392,7 +449,10 @@ class TouchNet:
 
                 os.remove(tar_path)
 
-                print(f"Extraction complete! Files are in: {self.root}")
+                print(f"Extraction complete! Files are in: {self.root}/")
+
+            else:
+                print(f"DIGIT dataset already exists at: {self.dataset_path}/")
 
             
         elif self.sensor_type == SensorType.GELSIGHTMINI:
@@ -405,7 +465,7 @@ class TouchNet:
                 tar_path = os.path.join(self.root, "gsmini_calibration_data.tar.gz")
 
                 print(f"Downloading GelSight Mini dataset ...")
-                response = requests.get('https://gelsightmini/dataset.tar.gz', stream=True)
+                response = requests.get('https://zenodo.org/records/17487330/files/gsmini_calibration_data.tar.gz?download=1', stream=True)
                 response.raise_for_status()
 
                 total_size = int(response.headers.get('content-length', 0))
@@ -433,7 +493,10 @@ class TouchNet:
 
                 os.remove(tar_path)
 
-                print(f"Extraction complete! Files are in: {self.root}")
+                print(f"Extraction complete! Files are in: {self.root}/")
+
+            else:
+                print(f"GelSight Mini dataset already exists at: {self.dataset_path}/")
 
         self.annotation_path = os.path.join(self.dataset_path, "annotations", "annotations.csv")
         self.blank_image_path = os.path.join(self.dataset_path, "blank_images", "blank.png")

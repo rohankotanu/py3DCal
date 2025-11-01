@@ -2,9 +2,11 @@ import numpy as np
 import time
 import csv
 import os
+from typing import Union
 from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
+
 from .Printers.Printer import Printer
 from .Sensors.Sensor import Sensor
 
@@ -70,11 +72,8 @@ class Calibrator:
             print("")
             return False
 
-    def initialize_printer(self, absolute: bool = True):
+    def initialize_printer(self):
         """ Sends gcode to configure and home 3D Printer
-
-        Args:
-            absolute (bool, optional): Determines whether to set 3D printer to absolute mode. Defaults to True.
 
         Returns:
             bool: Returns True if initialization was successful.
@@ -137,7 +136,7 @@ class Calibrator:
             print("")
             return False
 
-    def probe(self, home_printer: bool = True, save_images: bool = True, calibration_file_path: str = None, data_save_path: str = None):
+    def probe(self, home_printer: bool = True, save_images: bool = True, calibration_file_path: Union[str, Path] = None, data_save_path: str = "."):
         """ Executes the probing procedure on 3D printer
 
         Args:
@@ -170,14 +169,23 @@ class Calibrator:
         if data_save_path is not None:
             data_save_path = os.path.join(data_save_path, "sensor_calibration_data")
         
-        # Create folder to save sensor data if it doesn't already exist
+        # Create necessary directories if they don't exist
         Path(data_save_path).mkdir(parents=True, exist_ok=True)
+        Path(os.path.join(data_save_path, "annotations")).mkdir(parents=True, exist_ok=True)
+        Path(os.path.join(data_save_path, "blank_images")).mkdir(parents=True, exist_ok=True)
+        Path(os.path.join(data_save_path, "probe_images")).mkdir(parents=True, exist_ok=True)
 
         # Open a csv file to write calibration data
-        csv_file = open(data_save_path + '/sensor_data.csv', 'w', newline='')
-        csv_writer = csv.writer(csv_file)
-        csv_writer.writerow(['img_name', 'x_mm', 'y_mm', 'penetration_depth_mm'])
-        
+        with open(os.path.join(data_save_path, "annotations", "probe_data.csv"), 'w', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(['img_name', 'x_mm', 'y_mm', 'penetration_depth_mm'])
+
+        # Save blank image
+        if save_images == True:
+            blank_img = self.sensor.capture_image()
+            img = Image.fromarray(blank_img)
+            img.save(os.path.join(data_save_path, "blank_images", "blank.png"))
+
         # If no calibration file path was provided, use the default calibration file for the specified sensor
         if calibration_file_path == None:
             calibration_file_path = self.sensor.default_calibration_file
@@ -245,23 +253,28 @@ class Calibrator:
 
                 # Take desired number of images
                 if save_images == True:
-                    for j in range(int(self.calibration_points[i][3])):
-                        frame = self.sensor.capture_image()
+                    with open(os.path.join(data_save_path, "annotations", "probe_data.csv"), 'w', newline='') as csv_file:
+                        csv_writer = csv.writer(csv_file)
 
-                        img_name =  str(img_idx) + "_" + "X" + str(self.calibration_points[i][0]) + "Y" + str(self.calibration_points[i][1]) + "Z" + str(self.calibration_points[i][2]) + ".png"
-                        img_path = data_save_path + "/" + img_name
+                        for j in range(int(self.calibration_points[i][3])):
+                            frame = self.sensor.capture_image()
 
-                        img = Image.fromarray(frame)
-                        img.save(img_path)
+                            img_name =  str(img_idx) + "_" + "X" + str(self.calibration_points[i][0]) + "Y" + str(self.calibration_points[i][1]) + "Z" + str(self.calibration_points[i][2]) + ".png"
+                            img_path = os.path.join(data_save_path, "probe_images",img_name)
 
-                        csv_writer.writerow([img_name, self.calibration_points[i][0], self.calibration_points[i][1], self.calibration_points[i][2]])
+                            img = Image.fromarray(frame)
+                            img.save(img_path)
 
-                        img_idx += 1
+                            csv_writer.writerow([img_name, self.calibration_points[i][0], self.calibration_points[i][1], self.calibration_points[i][2]])
 
-                        time.sleep(0.5)
+                            img_idx += 1
 
-        # Close csv file
-        csv_file.close()
+                            time.sleep(0.5)
+
+                else:
+                    with open(os.path.join(data_save_path, "annotations", "probe_data.csv"), 'w', newline='') as csv_file:
+                        csv_writer = csv.writer(csv_file)
+                        csv_writer.writerow(["---", self.calibration_points[i][0], self.calibration_points[i][1], self.calibration_points[i][2]])
 
         # Move to Z clearance height
         self.printer.send_gcode("G0 Z" + str(self.sensor.z_offset + self.sensor.z_clearance))
