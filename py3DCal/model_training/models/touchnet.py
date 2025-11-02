@@ -104,6 +104,9 @@ class TouchNet(nn.Module):
         
         if load_pretrained and root is None:
             raise ValueError("root directory for storing/loading model cannot be None when load_pretrained is True.")
+        
+        if load_pretrained and not isinstance(root, (str, Path)):
+            raise ValueError("root directory must be a valid file system path as a string or pathlib.Path object when load_pretrained is True.")
 
         if not load_pretrained and sensor_type is not None:
             print("Warning: sensor_type parameter is ignored when load_pretrained is False.")

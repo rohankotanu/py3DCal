@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from ..datasets.tactile_sensor_dataset import TactileSensorDataset
 from ..datasets.split_dataset import split_dataset
-from .validate_device import validate_device
+from .validate_parameters import validate_device
 
 
 def train_model(model: nn.Module, dataset: TactileSensorDataset, num_epochs: int = 60, batch_size: int = 64, learning_rate: float = 1e-4, train_ratio: float = 0.8, loss_fn: nn.Module = nn.MSELoss(), device='cpu'):

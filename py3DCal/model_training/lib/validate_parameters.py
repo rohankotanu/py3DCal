@@ -1,4 +1,6 @@
 import torch
+from typing import Union
+from pathlib import Path
 
 def validate_device(device: str):
         """
@@ -20,3 +22,24 @@ def validate_device(device: str):
                 "  - 'mps': Apple Silicon GPU\n"
                 "See: https://pytorch.org/docs/stable/tensor_attributes.html#torch.device"
             ) from e
+        
+def validate_root(root):
+    """
+    Validates the root path specified by the user.
+
+    Args:
+        root: root path specified by the user.
+    Returns:
+        None.
+    Raises:
+        ValueError: If the root is not specified or invalid.
+    """
+    if root is None :
+       raise ValueError(
+           "Root path cannot be None.\n"
+       )
+    
+    if not isinstance(root, (str, Path)):
+       raise ValueError(
+           "root directory must be a valid file system path as a string or pathlib.Path object\n"
+       )

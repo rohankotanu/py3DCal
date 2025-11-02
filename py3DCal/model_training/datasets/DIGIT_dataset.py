@@ -5,6 +5,7 @@ from tqdm import tqdm
 from typing import Union
 from pathlib import Path
 from .tactile_sensor_dataset import TactileSensorDataset
+from ..lib.validate_parameters import validate_root
 
 
 class DIGIT(TactileSensorDataset):
@@ -18,6 +19,8 @@ class DIGIT(TactileSensorDataset):
         transform (callable, optional): A function/transform that takes in an PIL image and returns a transformed version. Default: ``transforms.ToTensor()``
     """
     def __init__(self, root: Union[str, Path] = Path("."), download=False, add_coordinate_embeddings=True, subtract_blank=True, transform=None):
+        validate_root(root)
+
         self.dataset_path = os.path.join(root, "digit_calibration_data")
 
         super().__init__(root=self.dataset_path, add_coordinate_embeddings=add_coordinate_embeddings, subtract_blank=subtract_blank, transform=transform)

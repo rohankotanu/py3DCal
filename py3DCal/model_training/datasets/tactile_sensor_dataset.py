@@ -9,6 +9,7 @@ from torchvision import transforms
 from ..lib.precompute_gradients import precompute_gradients
 from ..lib.get_gradient_map import get_gradient_map
 from ..lib.add_coordinate_embeddings import add_coordinate_embeddings
+from ..lib.validate_parameters import validate_root
 
 class TactileSensorDataset(Dataset):
     """
@@ -21,6 +22,8 @@ class TactileSensorDataset(Dataset):
         transform (callable, optional): A function/transform that takes in an PIL image and returns a transformed version. Default: ``transforms.ToTensor()``
     """
     def __init__(self, root: Union[str, Path], add_coordinate_embeddings=True, subtract_blank=True, transform=None):
+        validate_root(root)
+
         self.root = root
         self.annotation_path = os.path.join(root, "annotations", "annotations.csv")
         self.metadata_path = os.path.join(root, "annotations", "metadata.json")

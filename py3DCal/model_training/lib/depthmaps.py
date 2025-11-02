@@ -6,7 +6,7 @@ from typing import Union
 from PIL import Image
 import matplotlib.pyplot as plt
 from torchvision import transforms
-from .validate_device import validate_device
+from .validate_parameters import validate_device
 from .add_coordinate_embeddings import add_coordinate_embeddings
 from .fast_poisson import fast_poisson
 
