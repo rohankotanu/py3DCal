@@ -8,5 +8,5 @@ from .model_training import datasets, models
 from .model_training.datasets.split_dataset import split_dataset
 from .model_training.models.touchnet import SensorType
 from .model_training.lib.train_model import train_model
-from .model_training.lib.depthmaps import get_depthmap, save_depthmap_image, show_depthmap
+from .model_training.lib.depthmaps import get_depthmap, save_2d_depthmap, show_2d_depthmap
 from .utils.utils import list_com_ports

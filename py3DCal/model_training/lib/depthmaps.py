@@ -44,7 +44,7 @@ def get_depthmap(model, image_path: Union[str, Path], blank_image_path: Union[st
 
         return depthmap
 
-def save_depthmap_image(model, image_path: Union[str, Path], blank_image_path: Union[str, Path], device='cpu', save_path: Union[str, Path] = Path("depthmap.png")):
+def save_2d_depthmap(model, image_path: Union[str, Path], blank_image_path: Union[str, Path], device='cpu', save_path: Union[str, Path] = Path("depthmap.png")):
     """
     Save an image of the depthmap for a given input image.
     Args:
@@ -58,7 +58,7 @@ def save_depthmap_image(model, image_path: Union[str, Path], blank_image_path: U
 
     plt.imsave(save_path, depthmap, cmap='viridis')
 
-def show_depthmap(model, image_path: Union[str, Path], blank_image_path: Union[str, Path], device='cpu'):
+def show_2d_depthmap(model, image_path: Union[str, Path], blank_image_path: Union[str, Path], device='cpu'):
     """
     Show the depthmap for a given input image.
 

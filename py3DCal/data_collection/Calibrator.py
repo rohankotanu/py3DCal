@@ -142,7 +142,7 @@ class Calibrator:
         Args:
             home_printer (bool, optional): Determines whether to home the printer prior to probing. Defaults to True.
             save_images (bool, optional): Determines whether sensor images are saved. Defaults to True.
-            calibration_file_path (str, optional): The path of the calibration file. For the DIGIT and Gelsight Mini,
+            calibration_file_path (str, optional): The path of the calibration file. For the DIGIT and GelSight Mini,
                 if no file is specified, a default calibration file will be used.
             data_save_path (str, optional): The folder in which the data should be saved. If no folder is specified,
                 data will be stored in a directory named "sensor_calibration_data" within the current working directory.
