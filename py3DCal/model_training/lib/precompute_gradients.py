@@ -15,10 +15,10 @@ def precompute_gradients(dataset_path, annotation_path, r=36):
         numpy.ndarray: A h x w x 2 numpy array with x and y gradient values for a circle located at the center.
     """
     # Read data file
-    sensor_data = pd.read_csv(annotation_path, comment='#')
+    calibration_data = pd.read_csv(annotation_path)
 
     # Read the image
-    image_path = os.path.join(dataset_path, sensor_data['img_name'][0])
+    image_path = os.path.join(dataset_path, "probe_images", calibration_data['img_name'][0])
     image = Image.open(image_path)
     image = np.asarray(image)
 
