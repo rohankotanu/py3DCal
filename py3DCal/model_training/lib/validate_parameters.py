@@ -36,7 +36,7 @@ def validate_root(root):
     """
     if root is None :
        raise ValueError(
-           "Root path cannot be None.\n"
+           "root directory cannot be None.\n"
        )
     
     if not isinstance(root, (str, Path)):
