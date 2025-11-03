@@ -40,7 +40,7 @@ class DIGIT(TactileSensorDataset):
             tar_path = os.path.join(self.root, "digit_calibration_data.tar.gz")
 
             print(f"Downloading DIGIT dataset ...")
-            response = requests.get('https://zenodo.org/records/17487330/files/digit_calibration_data.tar.gz?download=1', stream=True)
+            response = requests.get('https://zenodo.org/records/17517028/files/digit_calibration_data.tar.gz?download=1', stream=True)
             response.raise_for_status()
 
             total_size = int(response.headers.get('content-length', 0))

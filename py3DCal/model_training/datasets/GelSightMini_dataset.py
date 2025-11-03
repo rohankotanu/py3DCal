@@ -20,7 +20,7 @@ class GelSightMini(TactileSensorDataset):
     """
     def __init__(self, root: Union[str, Path] = Path("."), download=False, add_coordinate_embeddings=True, subtract_blank=True, transform=None):
         validate_root(root)
-        
+
         self.dataset_path = os.path.join(root, "gsmini_calibration_data")
 
         super().__init__(root=self.dataset_path, add_coordinate_embeddings=add_coordinate_embeddings, subtract_blank=subtract_blank, transform=transform)
@@ -39,7 +39,7 @@ class GelSightMini(TactileSensorDataset):
             tar_path = os.path.join(self.root, "gsmini_calibration_data.tar.gz")
 
             print(f"Downloading GelSight Mini dataset ...")
-            response = requests.get('https://zenodo.org/records/17487330/files/gsmini_calibration_data.tar.gz?download=1', stream=True)
+            response = requests.get('https://zenodo.org/records/17517028/files/gsmini_calibration_data.tar.gz?download=1', stream=True)
             response.raise_for_status()
 
             total_size = int(response.headers.get('content-length', 0))
