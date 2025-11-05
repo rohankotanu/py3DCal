@@ -4,7 +4,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(
-    name='py3DCal',
+    name='py3dcal',
     version='1.0.0',
     url="https://github.com/rohankotanu/py3DCal",
     author="Rohan Kota",
@@ -24,11 +24,14 @@ setup(
         'pandas>=2.0.0',
         'scipy>=1.0.0',
         'torch>=2.0.0',
+        'torchvision>=0.23.0',
         'pyserial>=3.0',
         'opencv-python>=4.0.0',
         'pillow>=11.0.0',
         'tqdm>=4.0.0',
-        'requests>=2.0.0'
+        'requests>=2.0.0',
+        'scikit-learn>=1.0.0',
+        'digit-interface>=0.2.1'
     ],
     entry_points={
         'console_scripts': [

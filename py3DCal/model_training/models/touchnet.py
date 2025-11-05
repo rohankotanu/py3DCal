@@ -186,3 +186,26 @@ class TouchNet(nn.Module):
         state_dict = torch.load(file_path, map_location="cpu")
 
         self.load_state_dict(state_dict)
+
+    def load_weights(self, weights_path: Union[str, Path]):
+        """
+        Loads model weights from a specified .pth file.
+
+        Args:
+            weights_path (str or pathlib.Path): The file path to the .pth file containing the model weights.
+        Returns:
+            None.
+        Raises:
+            ValueError: If the weights_path is not specified or invalid.
+        """
+        if weights_path is None:
+            raise ValueError("weights_path cannot be None.")
+
+        if not isinstance(weights_path, (str, Path)):
+            raise ValueError("weights_path must be a valid file system path as a string or pathlib.Path object.")
+
+        if not os.path.exists(weights_path):
+            raise ValueError(f"The specified weights_path does not exist: {weights_path}")
+
+        state_dict = torch.load(weights_path, map_location="cpu")
+        self.load_state_dict(state_dict)

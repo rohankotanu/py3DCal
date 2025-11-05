@@ -153,6 +153,7 @@ class Calibrator:
         # Connect to 3D printer if not already connected
         if not self.printer_connected:
             self.connect_printer()
+            self.printer.send_gcode("M117 Sensor Calibration In Progress")
 
         # Connect to sensor
         if save_images == True:
@@ -253,7 +254,7 @@ class Calibrator:
 
                 # Take desired number of images
                 if save_images == True:
-                    with open(os.path.join(data_save_path, "annotations", "probe_data.csv"), 'w', newline='') as csv_file:
+                    with open(os.path.join(data_save_path, "annotations", "probe_data.csv"), 'a', newline='') as csv_file:
                         csv_writer = csv.writer(csv_file)
 
                         for j in range(int(self.calibration_points[i][3])):
@@ -272,7 +273,7 @@ class Calibrator:
                             time.sleep(0.5)
 
                 else:
-                    with open(os.path.join(data_save_path, "annotations", "probe_data.csv"), 'w', newline='') as csv_file:
+                    with open(os.path.join(data_save_path, "annotations", "probe_data.csv"), 'a', newline='') as csv_file:
                         csv_writer = csv.writer(csv_file)
                         csv_writer.writerow(["---", self.calibration_points[i][0], self.calibration_points[i][1], self.calibration_points[i][2]])
 
@@ -280,6 +281,9 @@ class Calibrator:
         self.printer.send_gcode("G0 Z" + str(self.sensor.z_offset + self.sensor.z_clearance))
 
         print("")
+
+        # Update printer display
+        self.printer.send_gcode("M117 Sensor Calibration Complete!")
 
         # Disconnect from 3D printer
         self.disconnect_printer()
