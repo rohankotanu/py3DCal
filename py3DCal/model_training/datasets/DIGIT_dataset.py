@@ -23,10 +23,10 @@ class DIGIT(TactileSensorDataset):
 
         self.dataset_path = os.path.join(root, "digit_calibration_data")
 
-        super().__init__(root=self.dataset_path, add_coordinate_embeddings=add_coordinate_embeddings, subtract_blank=subtract_blank, transform=transform)
-
         if download:
             self._download_dataset()
+
+        super().__init__(root=self.dataset_path, add_coordinate_embeddings=add_coordinate_embeddings, subtract_blank=subtract_blank, transform=transform)
 
     def _download_dataset(self):
         """
