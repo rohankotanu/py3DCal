@@ -2,25 +2,25 @@ import numpy as np
 from scipy.fftpack import dst
 from scipy.fftpack import idst
 
-def fast_poisson(Fx, Fy):
+def fast_poisson(Gx, Gy):
     """
     Fast Poisson solver for 2D images.
     Args:
-        Fx: 2D array of x-derivatives
-        Fy: 2D array of y-derivatives
+        Gx (np.ndarray): 2D array of x-derivatives
+        Gy (np.ndarray): 2D array of y-derivatives
     Returns:
-        img: 2D array of the solution to the Poisson equation
+        depthmap (np.ndarray): 2D array of the solution to the Poisson equation
     """
     
-    height, width = Fx.shape
+    height, width = Gx.shape
     
-    # Compute the difference of the Fx array in the x-direction to approximate the second derivative in the x-direction (only for interior)
-    Fxx = Fx[1:-1,1:-1] - Fx[1:-1,:-2]
-    # Compute the difference of the Fy array in the y-direction to approximate the second derivative in the y-direction (only for interior)
-    Fyy = Fy[1:-1,1:-1] - Fy[:-2,1:-1]
+    # Compute the difference of the Gx array in the x-direction to approximate the second derivative in the x-direction (only for interior)
+    Gxx = Gx[1:-1,1:-1] - Gx[1:-1,:-2]
+    # Compute the difference of the Gy array in the y-direction to approximate the second derivative in the y-direction (only for interior)
+    Gyy = Gy[1:-1,1:-1] - Gy[:-2,1:-1]
     
     # Combine the two second derivatives to form the source term for the Poisson equation, g
-    g = Fxx + Fyy 
+    g = Gxx + Gyy 
     
     # Apply the Discrete Sine Transform (DST) to the 2D array g (row-wise transform)
     g_sinx = dst(g, norm='ortho')
@@ -46,6 +46,6 @@ def fast_poisson(Fx, Fy):
     # Note: The norm='ortho' option in the DST and IDST ensures that the transforms are orthonormal, maintaining energy conservation in the transforms
 
     # Pad the result (which is only for the interior) with 0's at the border because we are assuming fixed boundary conditions
-    img = np.pad(g_xy, pad_width=1, mode='constant')
+    depthmap = np.pad(g_xy, pad_width=1, mode='constant')
 
-    return img
+    return depthmap
