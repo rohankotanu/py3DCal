@@ -21,7 +21,9 @@ class GelSightMini(TactileSensorDataset):
     def __init__(self, root: Union[str, Path] = Path("."), download=False, add_coordinate_embeddings=True, subtract_blank=True, transform=None):
         validate_root(root)
 
-        self.dataset_path = os.path.join(root, "gsmini_calibration_data")
+        self.root = root
+
+        self.dataset_path = os.path.join(self.root, "gsmini_calibration_data")
 
         if download:
             self._download_dataset()
