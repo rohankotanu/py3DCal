@@ -7,8 +7,8 @@ from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
 
-from .Printers.Printer import Printer
-from .Sensors.Sensor import Sensor
+from .printers.Printer import Printer
+from .sensors.Sensor import Sensor
 
 class Calibrator:
     """ Calibrator class to automatically probe a tactile sensor.

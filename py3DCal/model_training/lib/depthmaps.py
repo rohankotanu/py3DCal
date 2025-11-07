@@ -1,6 +1,7 @@
 from pyexpat import model
 import numpy as np
 import torch
+from torch import nn
 from pathlib import Path
 from typing import Union
 from PIL import Image
@@ -10,7 +11,7 @@ from .validate_parameters import validate_device
 from .add_coordinate_embeddings import add_coordinate_embeddings
 from .fast_poisson import fast_poisson
 
-def get_depthmap(model, image_path: Union[str, Path], blank_image_path: Union[str, Path], device='cpu') -> np.ndarray:
+def get_depthmap(model: nn.Module, image_path: Union[str, Path], blank_image_path: Union[str, Path], device='cpu') -> np.ndarray:
         """
         Returns the depthmap for a given input image.
         Args:
@@ -18,6 +19,7 @@ def get_depthmap(model, image_path: Union[str, Path], blank_image_path: Union[st
             image_path (str or pathlib.Path): Path to the input image.
             blank_image_path (str or pathlib.Path): Path to the blank image.
             device (str, optional): Device to run the model on. Defaults to 'cpu'.
+
         Returns:
             depthmap (numpy.ndarray): The computed depthmap.
         """
@@ -44,12 +46,15 @@ def get_depthmap(model, image_path: Union[str, Path], blank_image_path: Union[st
 
         return depthmap
 
-def save_2d_depthmap(model, image_path: Union[str, Path], blank_image_path: Union[str, Path], device='cpu', save_path: Union[str, Path] = Path("depthmap.png")):
+def save_2d_depthmap(model: nn.Module, image_path: Union[str, Path], blank_image_path: Union[str, Path], device='cpu', save_path: Union[str, Path] = Path("depthmap.png")):
     """
     Save an image of the depthmap for a given input image.
     Args:
+        model (nn.Module): A model which takes in an image and outputs gradient maps.
         image_path (str): Path to the input image.
         save_path (str or pathlib.Path): Path to save the depthmap image.
+        blank_image_path (str): Path to the blank image.
+        device (str, optional): Device to run the model on. Defaults to 'cpu'.
 
     Returns:
         None.
@@ -58,12 +63,15 @@ def save_2d_depthmap(model, image_path: Union[str, Path], blank_image_path: Unio
 
     plt.imsave(save_path, depthmap, cmap='viridis')
 
-def show_2d_depthmap(model, image_path: Union[str, Path], blank_image_path: Union[str, Path], device='cpu'):
+def show_2d_depthmap(model: nn.Module, image_path: Union[str, Path], blank_image_path: Union[str, Path], device='cpu'):
     """
     Show the depthmap for a given input image.
 
     Args:
+        model (nn.Module): A model which takes in an image and outputs gradient maps.
         image_path (str): Path to the input image.
+        blank_image_path (str): Path to the blank image.
+        device (str, optional): Device to run the model on. Defaults to 'cpu'.
 
     Returns:
         None.
