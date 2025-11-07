@@ -10,10 +10,10 @@ except:
 
 class GelsightMini(Sensor):
     """
-    GelsightMini: A Sensor Class for the Gelsight Mini sensor
+    GelsightMini: A Sensor Class for the GelSight Mini sensor
     """
     def __init__(self):
-        self.name = "Gelsight Mini"
+        self.name = "GelSight Mini"
         self.x_offset = 108
         self.y_offset = 110
         self.z_offset = 67
@@ -23,7 +23,7 @@ class GelsightMini(Sensor):
 
     def connect(self):
         """
-        Connects to the Gelsight Mini sensor.
+        Connects to the GelSight Mini sensor.
         """
         # Code to connect to the sensor
         self.sensor = gsdevice.Camera("GelSight Mini")
@@ -31,14 +31,14 @@ class GelsightMini(Sensor):
         
     def disconnect(self):
         """
-        Disconnects from the Gelsight Mini sensor.
+        Disconnects from the GelSight Mini sensor.
         """
         # Code to disconnect from the sensor
         self.sensor.stop_video()
 
     def capture_image(self):
         """
-        Captures an image from the Gelsight Mini sensor.
+        Captures an image from the GelSight Mini sensor.
         """
         # Code to return an image from the sensor
         image = cv2.cvtColor(self.sensor.get_image(), cv2.COLOR_BGR2RGB)

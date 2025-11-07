@@ -6,7 +6,6 @@ from typing import Union
 from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
-
 from .printers.Printer import Printer
 from .sensors.Sensor import Sensor
 
@@ -153,7 +152,7 @@ class Calibrator:
         # Connect to 3D printer if not already connected
         if not self.printer_connected:
             self.connect_printer()
-            self.printer.send_gcode("M117 Sensor Calibration In Progress")
+            self.printer.send_gcode("M117 Calibrating sensor...")
 
         # Connect to sensor
         if save_images == True:
@@ -257,11 +256,14 @@ class Calibrator:
                     with open(os.path.join(data_save_path, "annotations", "probe_data.csv"), 'a', newline='') as csv_file:
                         csv_writer = csv.writer(csv_file)
 
-                        for j in range(int(self.calibration_points[i][3])):
+                        # Flush frames to clear camera buffer
+                        self.sensor.flush_frames(n=5)
+
+                        for _ in range(int(self.calibration_points[i][3])):
                             frame = self.sensor.capture_image()
 
                             img_name =  str(img_idx) + "_" + "X" + str(self.calibration_points[i][0]) + "Y" + str(self.calibration_points[i][1]) + "Z" + str(self.calibration_points[i][2]) + ".png"
-                            img_path = os.path.join(data_save_path, "probe_images",img_name)
+                            img_path = os.path.join(data_save_path, "probe_images", img_name)
 
                             img = Image.fromarray(frame)
                             img.save(img_path)
@@ -283,7 +285,7 @@ class Calibrator:
         print("")
 
         # Update printer display
-        self.printer.send_gcode("M117 Sensor Calibration Complete!")
+        self.printer.send_gcode("M117 Calibration Done!")
 
         # Disconnect from 3D printer
         self.disconnect_printer()
@@ -292,7 +294,7 @@ class Calibrator:
         if save_images == True:
             self.disconnect_sensor()
 
-        print("Sensor calibration procedure complete!")
+        print("Calibration procedure complete!")
         print("")
 
         return True

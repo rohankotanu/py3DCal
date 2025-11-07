@@ -33,3 +33,12 @@ class Sensor(ABC):
             numpy.ndarray: The image from the sensor.
         """
         pass
+
+    def flush_frames(self, n: int = 5):
+        """Discards the next n frames to clear camera buffer.
+        
+        Args:
+            n (int): Number of frames to discard. Default is 5.
+        """
+        for _ in range(n):
+            self.capture_image()
