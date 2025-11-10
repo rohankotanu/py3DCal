@@ -30,8 +30,8 @@ def annotate(dataset_path: Union[str, Path], probe_radius_mm: Union[int, float],
         Saves annotated_data.csv in the dataset_path/annotations directory.
     """
     validate_root(dataset_path, must_exist=True)
-    validate_probe_radius(probe_radius_mm)
-    validate_indices(img_idxs)
+    _validate_probe_radius(probe_radius_mm)
+    _validate_indices(img_idxs, dataset_path, target_length=2)
 
     # Open probe data
     probe_data_path = os.path.join(dataset_path, "annotations", "probe_data.csv")
@@ -40,14 +40,32 @@ def annotate(dataset_path: Union[str, Path], probe_radius_mm: Union[int, float],
     # Get middle row
     middle_row = probe_data.loc[probe_data["y_mm"] == probe_data["y_mm"].median()]
 
-    # Get 25th and 75th percentile indices if img_idxs not provided
+    # Automatically select 2 images if indices not provided
     if img_idxs is None:
-        # Get the indices of the 25th percentile and 75th percentile X values
-        idx1 = middle_row.loc[middle_row["x_mm"] == middle_row["x_mm"].quantile(0.25)].index[0]
-        idx2 = middle_row.loc[middle_row["x_mm"] == middle_row["x_mm"].quantile(0.75)].index[0]
+        # Make sure there are multiple coordinates in the middle row
+        unique_x_coords = middle_row.drop_duplicates(subset='y_mm')
+
+        if len(unique_x_coords) >= 2:
+            # Get the indices of the 25th percentile and 75th percentile x-values in the middle row
+            idx1 = middle_row.loc[middle_row["x_mm"] == middle_row["x_mm"].quantile(0.25)].index[0]
+            idx2 = middle_row.loc[middle_row["x_mm"] == middle_row["x_mm"].quantile(0.75)].index[0]
+
+        else:
+            # Get unique coordinates
+            unique_coords = probe_data.drop_duplicates(subset=['x_mm', 'y_mm'])
+
+            # Sort unique coordinates by x_mm and y_mm
+            sorted_unique_data = unique_coords.sort_values(by=['y_mm', 'x_mm'])
+            
+            # Get the 25th and 75th percentile indices
+            idx1 = sorted_unique_data.index[math.floor(len(sorted_unique_data) * 0.25)]
+            idx2 = sorted_unique_data.index[math.floor(len(sorted_unique_data) * 0.75)]
     else:
         idx1 = img_idxs[0]
         idx2 = img_idxs[1]
+
+        if probe_data["x_mm"][idx1] == probe_data["x_mm"][idx2] and probe_data["y_mm"][idx1] == probe_data["y_mm"][idx2]:
+            raise ValueError("Selected images must have different x- and y-coordinates for annotation.")
 
     # Get the image names and probe coordinates
     image1_name = os.path.join(dataset_path, "probe_images", probe_data["img_name"][idx1])
@@ -63,11 +81,11 @@ def annotate(dataset_path: Union[str, Path], probe_radius_mm: Union[int, float],
 
     # Fit 2 circles
     circle1_x, circle1_y, circle1_r = _fit_circle(image1_name, blank_image_path)
-    circle2_x, _, _ = _fit_circle(image2_name, blank_image_path)
+    circle2_x, circle2_y, circle2_r = _fit_circle(image2_name, blank_image_path)
 
     # Compute pixels/mm
-    dx_mm = abs(img2_x_mm - img1_x_mm)
-    px_per_mm = abs(circle2_x - circle1_x) / dx_mm
+    d_mm = np.sqrt((img2_x_mm - img1_x_mm) ** 2 + (img2_y_mm - img1_y_mm) ** 2)
+    px_per_mm = np.sqrt((circle2_x - circle1_x) ** 2 + (circle2_y - circle1_y) ** 2) / d_mm
 
     # Fine tune the fitting
     px_per_mm, annotations = _adjust_fitting(dataset_path, anchor_idx=idx1, px_per_mm=px_per_mm, anchor_data=(circle1_x, circle1_y, circle1_r))
@@ -383,7 +401,111 @@ def _adjust_fitting(dataset_path: Union[str, Path], anchor_idx, px_per_mm, ancho
 
         return px_per_mm, calibration_data
 
-def validate_probe_radius(probe_radius_mm):
+def visualize_annotations(dataset_path: Union[str, Path], img_idxs=None, save_path=None):
+    """
+    Visualizes precomputed circles on images from the annotated data.
+    
+    Args:
+        dataset_path (str or pathlib.Path): Path to the dataset directory.
+        img_idxs (tuple or list, optional): Image indices to visualize. By default, shows 3 random images.
+        save_path (str): Optional path to save the visualization
+    
+    Returns:
+        None: Displays the image(s) with circles overlaid
+    """
+    validate_root(dataset_path, must_exist=True)
+    _validate_indices(img_idxs, dataset_path)
+
+    # Get paths
+    annotation_path = os.path.join(dataset_path, "annotations", "annotations.csv")
+    metadata_path = os.path.join(dataset_path, "annotations", "metadata.json")
+    probe_images_path = os.path.join(dataset_path, "probe_images")
+
+    # Load the annotated data
+    data = pd.read_csv(annotation_path)
+
+    # Get circle radius from metadata
+    with open(metadata_path, "r") as json_file:
+        metadata = json.load(json_file)
+    
+    probe_radius_mm = metadata["probe_radius_mm"]
+    px_per_mm = metadata["px_per_mm"]
+    radius = probe_radius_mm * px_per_mm
+    
+    # If no indices provided, select 3 random images
+    if img_idxs is None:
+        # Get 3 random indices from data
+        img_idxs = data.sample(n=3).index.tolist()
+    
+    # Create subplot layout
+    n_images = len(img_idxs)
+    if n_images == 1:
+        fig, ax = plt.subplots(1, 1, figsize=(8, 8))
+        axes = [ax]
+    else:
+        cols = min(3, n_images)
+        rows = (n_images + cols - 1) // cols
+        fig, axes = plt.subplots(rows, cols, figsize=(6*cols, 6*rows))
+        if rows == 1:
+            axes = axes if n_images > 1 else [axes]
+        else:
+            axes = axes.flatten()
+
+    for i, idx in enumerate(img_idxs):
+        # Get image info
+        img_name = data.iloc[idx]['img_name']
+        x_px = data.iloc[idx]['x_px']
+        y_px = data.iloc[idx]['y_px']
+        x_mm = data.iloc[idx]['x_mm']
+        y_mm = data.iloc[idx]['y_mm']
+        depth_mm = data.iloc[idx]['penetration_depth_mm']
+        
+        # Load image
+        img_path = os.path.join(probe_images_path, img_name)
+        if not os.path.exists(img_path):
+            print(f"Image not found: {img_path}")
+            continue
+            
+        # Read image using OpenCV and convert to RGB
+        img = cv2.imread(img_path)
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        
+        # Draw circle on image
+        img_with_circle = img_rgb.copy()
+        # Keep your float coordinates
+        center_x = float(x_px)
+        center_y = float(y_px)
+        print("center", center_x, center_y)
+        # Draw circle using Matplotlib (subpixel precision preserved)
+        circle = Circle((center_x, center_y), radius, color='red', fill=False, linewidth=2)
+        axes[i].imshow(img_rgb)
+        axes[i].add_patch(circle)
+
+        # Draw the exact center as a green dot
+        axes[i].plot(center_x, center_y, '*', color='lime', markersize=6)
+        
+        # Display in subplot
+        axes[i].imshow(img_with_circle)
+        axes[i].set_title(f'{img_name}\n'
+                            f'Position (mm): ({x_mm}, {y_mm})\n'
+                            f'Pixels (px): ({float(x_px):.1f}, {float(y_px):.1f})')
+        axes[i].axis('off')
+    
+    # Hide unused subplots
+    for i in range(len(img_idxs), len(axes)):
+        axes[i].axis('off')
+
+
+    fig.set_size_inches(14, 9)
+    plt.tight_layout()
+    
+    if save_path:
+        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+        print(f"Visualization saved to: {save_path}")
+    
+    plt.show()
+
+def _validate_probe_radius(probe_radius_mm):
     """
     Validates the probe radius specified by the user.
 
@@ -401,10 +523,9 @@ def validate_probe_radius(probe_radius_mm):
     if not isinstance(probe_radius_mm, (int, float)) or probe_radius_mm <= 0:
        raise ValueError(
            "Probe radius must be a positive number (int or float).\n"
-       )
-    
+       )  
 
-def validate_indices(idxs):
+def _validate_indices(idxs, dataset_path, target_length=None):
     """
     Validates the image indices specified by the user.
 
@@ -416,7 +537,24 @@ def validate_indices(idxs):
         ValueError: If the indices are not specified or invalid.
     """
     if idxs is not None:
-       if not (isinstance(idxs, (tuple, list)) and len(idxs) == 2 and all(isinstance(i, int) for i in idxs)):
-           raise ValueError(
-               "Image indices must be a tuple or list of two integers.\n"
-           )
+        # Check if data type is correct
+        if target_length is not None:
+            if not (isinstance(idxs, (tuple, list)) and len(idxs) == target_length and all(isinstance(i, int) for i in idxs)):
+                raise ValueError(
+                    f"Image indices must be a tuple or list of {target_length} integers.\n"
+                )
+            
+        else:
+            if not (isinstance(idxs, (tuple, list)) and all(isinstance(i, int) for i in idxs)):
+                raise ValueError(
+                    "Image indices must be a tuple or list of integers.\n"
+                )
+
+        # Check if indices are within range
+        annotation_path = os.path.join(dataset_path, "annotations", "annotations.csv")
+        data = pd.read_csv(annotation_path)
+        max_index = len(data) - 1
+
+        for idx in idxs:
+            if idx < 0 or idx > max_index:
+                raise ValueError(f"Image index {idx} is out of range. Valid range is 0 to {max_index}.")

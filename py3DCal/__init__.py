@@ -7,7 +7,7 @@ from .data_collection.sensors.GelsightMini.GelsightMini import GelsightMini
 from .model_training import datasets, models
 from .model_training.datasets.split_dataset import split_dataset
 from .model_training.models.touchnet import SensorType
-from .model_training.lib.annotate_dataset import annotate
+from .model_training.lib.annotate_dataset import annotate, visualize_annotations
 from .model_training.lib.train_model import train_model
 from .model_training.lib.depthmaps import get_depthmap, save_2d_depthmap, show_2d_depthmap
 from .model_training.lib.fast_poisson import fast_poisson
