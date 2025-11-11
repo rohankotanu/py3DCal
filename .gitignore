@@ -5,7 +5,7 @@ __pycache__/
 # Distribution / packaging
 build/
 dist/
-py3DCal.egg-info/
+py3dcal.egg-info/
 
 # Misc files
 .DS_Store
