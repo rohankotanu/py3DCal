@@ -1,3 +1,0 @@
-[console_scripts]
-list-com-ports = py3DCal:list_com_ports
-
