@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: py3dcal
+Version: 1.0.6
+Summary: UNKNOWN
+Home-page: https://github.com/rohankotanu/py3DCal
+Author: Rohan Kota
+Author-email: rohankota2026@u.northwestern.edu
+License: MIT
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Installing the package
+```python
+pip3 install py3dcal
+```
+
+<br>
+
+# For instructions on how to use this library, please visit https://rohankotanu.github.io/3DCal/
+

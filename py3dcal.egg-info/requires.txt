@@ -1,0 +1,13 @@
+numpy>=1.0.0
+matplotlib>=3.0.0
+pandas>=2.0.0
+scipy>=1.0.0
+torch>=2.0.0
+torchvision>=0.23.0
+pyserial>=3.0
+opencv-python>=4.0.0
+pillow>=11.0.0
+tqdm>=4.0.0
+requests>=2.0.0
+scikit-learn>=1.0.0
+digit-interface>=0.2.1
