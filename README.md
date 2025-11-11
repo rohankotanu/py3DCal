@@ -5,7 +5,7 @@ pip3 install py3dcal
 
 <br>
 
-# For instructions on how to use this library, please visit https://rohankotanu.github.io/3DCal/
+# For instructions on how to use this package, please visit https://rohankotanu.github.io/3DCal/
 
 <br>
 
