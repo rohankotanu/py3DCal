@@ -111,7 +111,7 @@ class TouchNet(nn.Module):
         if not load_pretrained and sensor_type is not None:
             print("Warning: sensor_type parameter is ignored when load_pretrained is False.")
 
-        if not load_pretrained and root is not ".":
+        if not load_pretrained and root != ".":
             print("Warning: root parameter is ignored when load_pretrained is False.")
 
     def _load_pretrained_model(self, root, sensor_type):
