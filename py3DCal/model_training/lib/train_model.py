@@ -3,6 +3,9 @@ import torch.optim as optim
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from ..datasets.tactile_sensor_dataset import TactileSensorDataset
+from ..datasets.ReSkin_dataset import ReSkinDataset
+from ..models.touchnet import TouchNet
+from ..models.magnet import MagNet
 from ..datasets.split_dataset import split_dataset
 from .validate_parameters import validate_device
 
@@ -92,5 +95,10 @@ def _validate_model_and_dataset(model: nn.Module, dataset: TactileSensorDataset)
     if not isinstance(model, nn.Module):
         raise ValueError("Model must be an instance of torch.nn.Module.")
     
-    if not isinstance(dataset, TactileSensorDataset):
-        raise ValueError("Dataset must be an instance of py3DCal.datasets.TactileSensorDataset.")
+    # TouchNet models should use TactileSensorDataset, MagNet models should use ReSkinDataset
+    if isinstance(model, TouchNet):
+        if not isinstance(dataset, TactileSensorDataset):
+            raise ValueError("Dataset must be an instance of py3DCal.datasets.TactileSensorDataset.")
+    elif isinstance(model, MagNet):
+        if not isinstance(dataset, ReSkinDataset):
+            raise ValueError("Dataset must be an instance of py3DCal.datasets.ReSkinDataset.")

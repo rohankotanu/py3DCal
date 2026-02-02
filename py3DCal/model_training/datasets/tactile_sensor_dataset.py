@@ -9,7 +9,7 @@ from torchvision import transforms
 from ..lib.precompute_gradients import precompute_gradients
 from ..lib.get_gradient_map import get_gradient_map
 from ..lib.add_coordinate_embeddings import add_coordinate_embeddings
-from ..lib.validate_parameters import validate_root, validate_dataset
+from ..lib.validate_parameters import validate_dataset
 
 class TactileSensorDataset(Dataset):
     """
@@ -54,13 +54,17 @@ class TactileSensorDataset(Dataset):
     def __len__(self):
         return len(self.data)  # Use the DataFrame length
 
-    def __getitem__(self, idx):
-        # Check if index is valid
-        if idx < 0 or idx >= len(self.data):
-            raise IndexError("Index out of range")
-        
+    def __getitem__(self, idx):    
         if torch.is_tensor(idx):
             idx = idx.tolist()
+
+            for i in idx:
+                if i < 0 or i >= len(self.data):
+                    raise IndexError(f"Index {i} out of range")
+        else:
+            # Check if index is valid
+            if idx < 0 or idx >= len(self.data):
+                raise IndexError("Index out of range")
 
         image_name = os.path.join(self.root, "probe_images", self.data.iloc[idx, 0])
         image = Image.open(image_name).convert("RGB")

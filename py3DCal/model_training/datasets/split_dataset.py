@@ -2,20 +2,21 @@ import copy
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from .tactile_sensor_dataset import TactileSensorDataset
+from .ReSkin_dataset import ReSkinDataset
 
 def split_dataset(dataset, train_ratio=0.8):
     """
     Splits a dataset into training and validation sets.
 
     Args:
-        dataset (py3DCal.datasets.TactileSensorDataset): The dataset to split.
+        dataset (py3DCal.datasets.TactileSensorDataset or py3DCal.datasets.ReSkinDataset): The dataset to split.
         train_ratio (float): The proportion of the dataset to include in the training set. Default is 0.8.
 
     Returns:
         tuple: A tuple containing the training and validation datasets.
     """
-    if not isinstance(dataset, TactileSensorDataset):
-        raise TypeError("Expected dataset to be an instance of py3DCal.datasets.TactileSensorDataset")
+    if not isinstance(dataset, (TactileSensorDataset, ReSkinDataset)):
+        raise TypeError("Expected dataset to be an instance of py3DCal.datasets.TactileSensorDataset or py3DCal.datasets.ReSkinDataset")
 
     df = dataset.data.copy()
 

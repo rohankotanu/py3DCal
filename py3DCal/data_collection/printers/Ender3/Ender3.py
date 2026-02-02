@@ -9,7 +9,7 @@ class Ender3(Printer):
     Args:
         port (str or pathlib.Path): The COM port the printer is connected to.
     """
-    def __init__(self, port: Union[str, Path]):
+    def __init__(self, port: str):
         self.port = port
         self.name = "Ender 3"
 
