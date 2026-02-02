@@ -41,7 +41,7 @@ class GelSightMini(TactileSensorDataset):
             tar_path = os.path.join(self.root, "gsmini_calibration_data.tar.gz")
 
             print(f"Downloading GelSight Mini dataset ...")
-            response = requests.get('https://zenodo.org/records/17517028/files/gsmini_calibration_data.tar.gz?download=1', stream=True)
+            response = requests.get('https://zenodo.org/records/18462608/files/gsmini_calibration_data.tar.gz?download=1', stream=True)
             response.raise_for_status()
 
             total_size = int(response.headers.get('content-length', 0))

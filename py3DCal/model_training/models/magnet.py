@@ -67,7 +67,7 @@ class MagNet(nn.Module):
         if not os.path.exists(file_path):
 
             print(f"Downloading ReSkin pretrained weights ...")
-            response = requests.get('https://zenodo.org/records/17517028/files/reskin_pretrained_weights.pth?download=1', stream=True)
+            response = requests.get('https://zenodo.org/records/18462608/files/reskin_pretrained_weights.pth?download=1', stream=True)
             response.raise_for_status()
 
             total_size = int(response.headers.get('content-length', 0))
