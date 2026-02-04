@@ -1,6 +1,8 @@
+from pathlib import Path
+from typing import Union
 import torch
-import torch.optim as optim
 import torch.nn as nn
+import torch.optim as optim
 from torch.utils.data import DataLoader
 from ..datasets.tactile_sensor_dataset import TactileSensorDataset
 from ..datasets.ReSkin_dataset import ReSkinDataset
@@ -10,14 +12,14 @@ from ..datasets.split_dataset import split_dataset
 from .validate_parameters import validate_device
 
 
-def train_model(model: nn.Module, dataset: TactileSensorDataset, num_epochs: int = 60, batch_size: int = 64, learning_rate: float = 1e-4, train_ratio: float = 0.8, loss_fn: nn.Module = nn.MSELoss(), device='cpu'):
+def train_model(model: nn.Module, dataset: Union[TactileSensorDataset, ReSkinDataset], num_epochs: int = 60, batch_size: int = 64, learning_rate: float = 1e-4, train_ratio: float = 0.8, loss_fn: nn.Module = nn.MSELoss(), device='cpu'):
     """
     Train TouchNet model on a dataset for 60 epochs with a
     64 batch size, and AdamW optimizer with learning rate 1e-4.
 
     Args:
-        model (nn.Module): The PyTorch model to be trained.
-        dataset (py3DCal.datasets.TactileSensorDataset): The dataset to train the model on.
+        model (torch.nn.Module): The PyTorch model to be trained.
+        dataset (py3DCal.datasets.TactileSensorDataset or py3DCal.datasets.ReSkinDataset): The dataset to train the model on.
         num_epochs (int): Number of epochs to train for. Defaults to 60.
         batch_size (int): Batch size. Defaults to 64.
         learning_rate (float): Learning rate. Defaults to 1e-4.

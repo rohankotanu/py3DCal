@@ -301,7 +301,7 @@ class Calibrator:
 
         return True
     
-    def probe_magnetic(self, home_printer: bool = True, save_data: bool = True, calibration_file_path: Union[str, Path] = None, data_save_path: str = "."):
+    def probe_reskin(self, home_printer: bool = True, save_data: bool = True, calibration_file_path: Union[str, Path] = None, data_save_path: str = "."):
         """ Executes the probing procedure for a ReSkin magnetic sensor on 3D printer
 
         Args:

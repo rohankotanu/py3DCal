@@ -15,7 +15,7 @@ def get_depthmap(model: nn.Module, image_path: Union[str, Path], blank_image_pat
         """
         Returns the depthmap for a given input image.
         Args:
-            model: A model which takes in an image and outputs gradient maps.
+            model (torch.nn.Module): A model which takes in an image and outputs gradient maps.
             image_path (str or pathlib.Path): Path to the input image.
             blank_image_path (str or pathlib.Path): Path to the blank image.
             device (str, optional): Device to run the model on. Defaults to 'cpu'.
@@ -50,7 +50,7 @@ def save_2d_depthmap(model: nn.Module, image_path: Union[str, Path], blank_image
     """
     Save an image of the depthmap for a given input image.
     Args:
-        model (nn.Module): A model which takes in an image and outputs gradient maps.
+        model (torch.nn.Module): A model which takes in an image and outputs gradient maps.
         image_path (str): Path to the input image.
         save_path (str or pathlib.Path): Path to save the depthmap image.
         blank_image_path (str): Path to the blank image.
@@ -68,7 +68,7 @@ def show_2d_depthmap(model: nn.Module, image_path: Union[str, Path], blank_image
     Show the depthmap for a given input image.
 
     Args:
-        model (nn.Module): A model which takes in an image and outputs gradient maps.
+        model (torch.nn.Module): A model which takes in an image and outputs gradient maps.
         image_path (str): Path to the input image.
         blank_image_path (str): Path to the blank image.
         device (str, optional): Device to run the model on. Defaults to 'cpu'.

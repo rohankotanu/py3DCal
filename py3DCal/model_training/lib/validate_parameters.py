@@ -1,6 +1,5 @@
 import os
 import torch
-from typing import Union
 from pathlib import Path
 
 def validate_device(device: str):
