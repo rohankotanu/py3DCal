@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='py3dcal',
-    version='2.0.0',
+    version='1.1.0',
     url="https://github.com/rohankotanu/py3DCal",
     author="Rohan Kota",
     author_email="rohankota2026@u.northwestern.edu",
